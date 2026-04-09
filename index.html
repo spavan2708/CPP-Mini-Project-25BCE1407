@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imperial Bank — Cooperative Savings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,700&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C;--gold2:#F0D080;--gold3:#8A6A1E;
+  --gold-bg:rgba(201,168,76,0.09);--gold-border:rgba(201,168,76,0.18);--gold-border2:rgba(201,168,76,0.35);
+  /* pure black palette — no more blue tints */
+  --ink:#000000;--ink2:#0a0a0a;--ink3:#111111;--ink4:#181818;--ink5:#222222;--ink6:#2c2c2c;
+  --text:#E8E4D8;--text2:#908C84;--text3:#484440;
+  --green:#22C97A;--green-bg:rgba(34,201,122,0.09);--green-border:rgba(34,201,122,0.22);
+  --red:#E84050;--red-bg:rgba(232,64,80,0.09);--red-border:rgba(232,64,80,0.22);
+  --amber:#E8A020;--amber-bg:rgba(232,160,32,0.09);--amber-border:rgba(232,160,32,0.22);
+  --r:7px;--r2:13px;--r3:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--text);overflow:hidden}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+#app{position:relative;z-index:1;display:grid;grid-template-rows:54px 1fr;height:100vh}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+    background:rgba(0,0,0,0.96);backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--gold-border);z-index:50}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;
+      font-size:18px;font-weight:900;color:var(--gold);user-select:none;letter-spacing:.02em}
+.logo-box{width:30px;height:30px;border:1.5px solid var(--gold);border-radius:6px;
+          display:flex;align-items:center;justify-content:center;font-size:11px;
+          background:var(--gold-bg);color:var(--gold)}
+.nav-mid{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3)}
+.live-pill{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--green);
+           background:var(--green-bg);padding:4px 11px;border-radius:99px;border:1px solid var(--green-border)}
+.live-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);
+                   animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ── BODY GRID ── */
+.body-grid{display:grid;grid-template-columns:206px 1fr 268px;overflow:hidden;height:100%}
+
+/* ── SIDEBAR ── */
+aside{background:#050505;border-right:1px solid var(--gold-border);
+      display:flex;flex-direction:column;padding:14px 9px 10px;
+      overflow-y:auto;scrollbar-width:none;gap:1px}
+.sl{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);
+    padding:7px 8px 3px;display:flex;align-items:center;gap:5px}
+.sl::after{content:'';flex:1;height:1px;background:var(--gold-border)}
+.sb{display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;
+    background:transparent;border:1px solid transparent;border-radius:var(--r);
+    color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12.5px;
+    cursor:pointer;transition:all .14s;text-align:left;position:relative}
+.sb:hover{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold2);transform:translateX(2px)}
+.sb.active{background:rgba(201,168,76,0.11);border-color:var(--gold-border2);color:var(--gold)}
+.sb.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;
+                   width:2px;background:var(--gold);border-radius:0 2px 2px 0}
+.sb.sb-del:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+.sb.sb-del.active{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+.sb.sb-edit:hover{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+.sb.sb-edit.active{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+.si{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;
+    justify-content:center;font-size:11px;background:rgba(255,255,255,0.04);
+    flex-shrink:0;transition:background .13s}
+.sb:hover .si,.sb.active .si{background:var(--gold-bg)}
+.sb.sb-del:hover .si,.sb.sb-del.active .si{background:var(--red-bg)}
+.sb.sb-edit:hover .si,.sb.sb-edit.active .si{background:var(--amber-bg)}
+.sdiv{height:1px;background:var(--gold-border);margin:5px 0}
+.sidebar-bottom{margin-top:auto;border-top:1px solid var(--gold-border);padding-top:10px}
+.sb-stat{display:flex;justify-content:space-between;padding:2px 7px;font-size:11px}
+.sb-stat .k{color:var(--text3)}.sb-stat .v{font-family:'DM Mono',monospace;color:var(--gold);font-size:10.5px}
+
+/* ── CENTER ── */
+.center{display:flex;flex-direction:column;overflow:hidden;background:var(--ink2)}
+
+/* stat strip */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--gold-border);flex-shrink:0}
+.sc{padding:10px 15px;border-right:1px solid var(--gold-border);position:relative;
+    transition:background .18s;cursor:default}
+.sc:last-child{border-right:none}
+.sc:hover{background:rgba(201,168,76,0.03)}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+           background:linear-gradient(90deg,transparent,var(--gold),transparent);
+           opacity:0;transition:opacity .2s}
+.sc:hover::after{opacity:1}
+.sc-label{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.sc-val{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);line-height:1}
+.sc-sub{font-size:9.5px;color:var(--text3);margin-top:2px}
+
+/* ── MODAL OVERLAY ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(8px);
+         z-index:200;display:none;align-items:center;justify-content:center}
+.overlay.show{display:flex;animation:fadeIn .16s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--ink3);border:1px solid var(--gold-border);border-radius:var(--r3);
+       padding:24px 26px;width:460px;max-width:94vw;max-height:90vh;overflow-y:auto;
+       position:relative;animation:slideUp .2s cubic-bezier(.17,.67,.42,1.1);
+       scrollbar-width:thin;scrollbar-color:var(--gold3) transparent}
+.modal-wide{width:520px}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+               background:linear-gradient(90deg,transparent,var(--gold),transparent);
+               border-radius:var(--r3) var(--r3) 0 0}
+.modal-del::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.modal-edit::before{background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+             color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.modal-title::before{content:'';width:3px;height:16px;background:var(--gold);border-radius:2px}
+.modal-del .modal-title{color:var(--red)}
+.modal-del .modal-title::before{background:var(--red)}
+.modal-edit .modal-title{color:var(--amber)}
+.modal-edit .modal-title::before{background:var(--amber)}
+.modal-close{position:absolute;top:12px;right:14px;background:transparent;border:none;
+             color:var(--text3);font-size:16px;cursor:pointer;line-height:1;
+             padding:4px 6px;border-radius:5px;transition:all .11s}
+.modal-close:hover{color:var(--text);background:var(--ink5)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10.5px;color:var(--text2);letter-spacing:.08em;
+             text-transform:uppercase;margin-bottom:4px}
+.field input,.field select{width:100%;padding:8px 11px;background:var(--ink4);
+  border:1px solid var(--ink5);border-radius:var(--r);font-family:'DM Mono',monospace;
+  font-size:13px;color:var(--text);outline:none;transition:border-color .14s}
+.field input:focus,.field select:focus{border-color:var(--gold3)}
+.field input::placeholder{color:var(--text3)}
+.field input[readonly]{opacity:.55;cursor:default}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.modal-err{font-size:11.5px;color:var(--red);margin-bottom:8px;min-height:15px;font-family:'DM Mono',monospace}
+.modal-warn{font-size:12px;color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-border);
+            border-radius:var(--r);padding:10px 13px;margin-bottom:14px;line-height:1.5}
+.btn-row{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+.btn{padding:8px 18px;border-radius:var(--r);font-family:'DM Sans',sans-serif;
+     font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .14s}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--ink);
+          box-shadow:0 2px 10px rgba(201,168,76,.25)}
+.btn-gold:hover{transform:scale(1.03);box-shadow:0 3px 16px rgba(201,168,76,.38)}
+.btn-red{background:linear-gradient(135deg,var(--red),#a02030);color:#fff;
+         box-shadow:0 2px 10px rgba(232,64,80,.25)}
+.btn-red:hover{transform:scale(1.03);box-shadow:0 3px 16px rgba(232,64,80,.38)}
+.btn-amber{background:linear-gradient(135deg,var(--amber),#a06010);color:var(--ink);
+           box-shadow:0 2px 10px rgba(232,160,32,.25)}
+.btn-amber:hover{transform:scale(1.03);box-shadow:0 3px 16px rgba(232,160,32,.38)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--ink5)}
+.btn-ghost:hover{border-color:var(--text3);color:var(--text)}
+.section-divider{height:1px;background:var(--ink5);margin:14px 0}
+.section-label{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+
+/* ── LEDGER ── */
+.ledger{flex:1;overflow-y:auto;padding:16px 20px 8px;font-family:'DM Mono',monospace;
+        font-size:12.5px;line-height:1.9;scrollbar-width:thin;scrollbar-color:var(--gold3) transparent}
+.ledger::-webkit-scrollbar{width:3px}.ledger::-webkit-scrollbar-thumb{background:var(--gold3);border-radius:3px}
+.line{display:block;animation:lineIn .09s ease both}
+@keyframes lineIn{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+.c-gold{color:var(--gold)}.c-gold2{color:var(--gold2)}.c-green{color:var(--green)}
+.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-dim{color:var(--text3)}
+.c-text{color:var(--text)}.c-head{color:var(--gold2);font-weight:500}
+.c-prompt{color:#d4a840}.c-sep{color:var(--ink6)}.c-in{color:var(--gold2)}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{display:flex;align-items:center;gap:9px;padding:9px 16px;
+            background:rgba(0,0,0,0.96);border-top:1px solid var(--gold-border);
+            backdrop-filter:blur(10px);flex-shrink:0}
+.pm{font-family:'DM Mono',monospace;font-size:16px;color:var(--gold);user-select:none}
+.bottom-input{flex:1;background:transparent;border:none;outline:none;
+              font-family:'DM Mono',monospace;font-size:13px;color:var(--text);caret-color:var(--gold)}
+.bottom-input::placeholder{color:var(--text3)}
+.hint{font-size:10.5px;color:var(--text3);font-family:'DM Mono',monospace;
+      padding:2px 7px;border:1px solid var(--ink5);border-radius:4px;white-space:nowrap}
+.send-btn{padding:6px 18px;background:linear-gradient(135deg,var(--gold),var(--gold3));
+          color:var(--ink);border:none;border-radius:var(--r);
+          font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;
+          transition:all .14s;box-shadow:0 2px 8px rgba(201,168,76,.2)}
+.send-btn:hover{transform:scale(1.04);box-shadow:0 3px 14px rgba(201,168,76,.34)}
+
+/* ── RIGHT PANEL ── */
+.right{background:#050505;border-left:1px solid var(--gold-border);
+       padding:14px 12px;display:flex;flex-direction:column;gap:11px;
+       overflow-y:auto;scrollbar-width:none}
+.rt{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:700;color:var(--gold);
+    display:flex;align-items:center;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--gold-border)}
+.rt::before{content:'';width:2px;height:12px;background:var(--gold);border-radius:2px}
+.icard{background:var(--ink3);border:1px solid var(--gold-border);
+       border-radius:var(--r2);padding:10px 12px;position:relative;overflow:hidden}
+.icard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+               background:linear-gradient(90deg,transparent,var(--gold-border),transparent)}
+.ir{display:flex;justify-content:space-between;align-items:center;
+    font-size:11.5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.ir:last-child{border-bottom:none}
+.ir .k{color:var(--text3)}.ir .v{font-family:'DM Mono',monospace;font-size:11px;color:var(--text)}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.qc{background:var(--ink3);border:1px solid var(--gold-border);border-radius:var(--r);
+    padding:7px 9px;cursor:pointer;transition:all .13s;user-select:none}
+.qc:hover{background:var(--gold-bg);border-color:var(--gold3);transform:translateY(-1px);
+          box-shadow:0 2px 9px rgba(201,168,76,.10)}
+.qc:active{transform:scale(.97)}
+.qc.qc-del{border-color:var(--red-border)}
+.qc.qc-del:hover{background:var(--red-bg);border-color:var(--red-border)}
+.qc.qc-edit{border-color:var(--amber-border)}
+.qc.qc-edit:hover{background:var(--amber-bg);border-color:var(--amber-border)}
+.qn{font-family:'Playfair Display',serif;font-size:17px;color:var(--gold);line-height:1}
+.qc.qc-del .qn{color:var(--red)}.qc.qc-edit .qn{color:var(--amber)}
+.ql{font-size:10px;color:var(--text3);margin-top:1px}
+#live-list{display:flex;flex-direction:column;gap:4px}
+.la{display:flex;align-items:center;justify-content:space-between;
+    padding:7px 9px;background:var(--ink4);border:1px solid var(--gold-border);
+    border-radius:var(--r);cursor:pointer;transition:all .12s}
+.la:hover{border-color:var(--gold3);background:var(--gold-bg)}
+.la-no{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--text3)}
+.la-nm{font-size:12px;color:var(--text);margin-top:1px;max-width:106px;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.la-bal{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:500}
+.la-bal.ok{color:var(--green)}.la-bal.low{color:var(--red)}
+.la-actions{display:flex;gap:3px;margin-top:3px}
+.la-btn{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid;cursor:pointer;
+        background:transparent;font-family:'DM Mono',monospace;transition:all .11s}
+.la-btn-e{color:var(--amber);border-color:var(--amber-border)}
+.la-btn-e:hover{background:var(--amber-bg)}
+.la-btn-d{color:var(--red);border-color:var(--red-border)}
+.la-btn-d:hover{background:var(--red-bg)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;
+       border-radius:99px;font-size:10px;font-weight:500}
+.b-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.b-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.b-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+/* ── TOAST ── */
+#toasts{position:fixed;top:62px;right:18px;z-index:999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--ink4);border:1px solid var(--gold-border);border-radius:var(--r2);
+       padding:9px 15px;font-size:12px;display:flex;align-items:center;gap:8px;
+       backdrop-filter:blur(12px);animation:tIn .22s cubic-bezier(.17,.67,.42,1.2) both;
+       box-shadow:0 5px 20px rgba(0,0,0,.5);pointer-events:auto;min-width:190px}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.toast.tok{border-color:var(--green-border)}.toast.terr{border-color:var(--red-border)}
+.toast.twarn{border-color:var(--amber-border)}.toast-ic{font-size:15px}
+
+@media(max-width:900px){.right{display:none}.body-grid{grid-template-columns:190px 1fr}}
+@media(max-width:600px){aside{display:none}.body-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="toasts"></div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Create Account -->
+<div class="overlay" id="ov-create">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeModal('ov-create')">✕</button>
+    <div class="modal-title">Open New Account</div>
+    <div class="field-row">
+      <div class="field"><label>Account No.</label><input id="f-accno" type="number" placeholder="e.g. 1001" min="1"></div>
+      <div class="field"><label>Opening Balance (₹)</label><input id="f-bal" type="number" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="field"><label>Member Full Name</label><input id="f-name" type="text" placeholder="e.g. Ravi Kumar"></div>
+    <div class="field-row">
+      <div class="field"><label>Mobile Number</label><input id="f-mobile" type="tel" placeholder="e.g. 9876543210" maxlength="15"></div>
+      <div class="field"><label>Email Address</label><input id="f-email" type="email" placeholder="e.g. ravi@email.com"></div>
+    </div>
+    <div class="modal-err" id="err-create"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doCreateAccount()">Open Account</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-create')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deposit -->
+<div class="overlay" id="ov-deposit">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ov-deposit')">✕</button>
+    <div class="modal-title">Deposit</div>
+    <div class="field"><label>Account No.</label><input id="fd-accno" type="number" placeholder="Account number"></div>
+    <div class="field"><label>Amount (₹)</label><input id="fd-amt" type="number" placeholder="Amount to deposit" min="0.01" step="0.01"></div>
+    <div class="modal-err" id="err-deposit"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doDeposit()">Deposit</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-deposit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw -->
+<div class="overlay" id="ov-withdraw">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ov-withdraw')">✕</button>
+    <div class="modal-title">Withdraw</div>
+    <div class="field"><label>Account No.</label><input id="fw-accno" type="number" placeholder="Account number"></div>
+    <div class="field"><label>Amount (₹)</label><input id="fw-amt" type="number" placeholder="Amount to withdraw" min="0.01" step="0.01"></div>
+    <div class="modal-err" id="err-withdraw"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doWithdraw()">Withdraw</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-withdraw')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Balance -->
+<div class="overlay" id="ov-balance">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ov-balance')">✕</button>
+    <div class="modal-title">Balance Enquiry</div>
+    <div class="field"><label>Account No.</label><input id="fb-accno" type="number" placeholder="Account number"></div>
+    <div class="modal-err" id="err-balance"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doBalance()">Check Balance</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-balance')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div class="overlay" id="ov-history">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ov-history')">✕</button>
+    <div class="modal-title">Transaction History</div>
+    <div class="field-row">
+      <div class="field"><label>Account No.</label><input id="fh-accno" type="number" placeholder="Account number"></div>
+      <div class="field"><label>Show Last N</label><input id="fh-n" type="number" placeholder="5" value="5" min="1"></div>
+    </div>
+    <div class="modal-err" id="err-history"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doHistory()">Show History</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-history')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Account -->
+<div class="overlay" id="ov-edit">
+  <div class="modal modal-wide modal-edit">
+    <button class="modal-close" onclick="closeModal('ov-edit')">✕</button>
+    <div class="modal-title">Edit Account Details</div>
+    <div class="field-row">
+      <div class="field"><label>Account No. (read-only)</label><input id="fe-accno" type="number" readonly></div>
+      <div class="field"><label>Current Balance (read-only)</label><input id="fe-bal" type="text" readonly></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="section-label">Editable Fields</div>
+    <div class="field"><label>Full Name</label><input id="fe-name" type="text" placeholder="Member name"></div>
+    <div class="field-row">
+      <div class="field"><label>Mobile Number</label><input id="fe-mobile" type="tel" placeholder="Mobile number" maxlength="15"></div>
+      <div class="field"><label>Email Address</label><input id="fe-email" type="email" placeholder="Email address"></div>
+    </div>
+    <div class="modal-err" id="err-edit"></div>
+    <div class="btn-row">
+      <button class="btn btn-amber" onclick="doEditAccount()">Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-edit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account -->
+<div class="overlay" id="ov-delete">
+  <div class="modal modal-del">
+    <button class="modal-close" onclick="closeModal('ov-delete')">✕</button>
+    <div class="modal-title">Delete Account</div>
+    <div class="modal-warn" id="del-warn">⚠ This will permanently remove the account and all its transactions. This cannot be undone.</div>
+    <div class="field"><label>Account No.</label><input id="fdel-accno" type="number" placeholder="Account number to delete" oninput="previewDelete()"></div>
+    <div id="del-preview" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);min-height:18px;margin-bottom:10px"></div>
+    <div class="field"><label>Type DELETE to confirm</label><input id="fdel-confirm" type="text" placeholder="Type DELETE" autocomplete="off"></div>
+    <div class="modal-err" id="err-delete"></div>
+    <div class="btn-row">
+      <button class="btn btn-red" onclick="doDeleteAccount()">Delete Account</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-delete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Low Balance -->
+<div class="overlay" id="ov-lowbal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ov-lowbal')">✕</button>
+    <div class="modal-title">Low Balance Report</div>
+    <div class="field"><label>Threshold (₹)</label><input id="fl-thresh" type="number" placeholder="500" value="500" min="0"></div>
+    <div class="modal-err" id="err-lowbal"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="doLowBalance()">Run Report</button>
+      <button class="btn btn-ghost" onclick="closeModal('ov-lowbal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══ -->
+<div id="app">
+  <nav>
+    <div class="logo"><div class="logo-box">IB</div>Imperial Bank</div>
+    <div class="nav-mid">Cooperative Savings System · DA2</div>
+    <div class="live-pill">System Online</div>
+  </nav>
+  <div class="body-grid">
+
+    <!-- SIDEBAR -->
+    <aside>
+      <div class="sl">Operations</div>
+      <button class="sb" id="sb1" onclick="openModal('ov-create')"><span class="si">＋</span>Create Account</button>
+      <button class="sb" id="sb2" onclick="openModal('ov-deposit')"><span class="si">↓</span>Deposit</button>
+      <button class="sb" id="sb3" onclick="openModal('ov-withdraw')"><span class="si">↑</span>Withdraw</button>
+      <button class="sb" id="sb4" onclick="openModal('ov-balance')"><span class="si">◎</span>Balance Enquiry</button>
+      <div class="sdiv"></div>
+      <div class="sl">Manage</div>
+      <button class="sb sb-edit" id="sb-edit" onclick="openModal('ov-edit')"><span class="si">✎</span>Edit Account</button>
+      <button class="sb sb-del"  id="sb-del"  onclick="openModal('ov-delete')"><span class="si">✕</span>Delete Account</button>
+      <div class="sdiv"></div>
+      <div class="sl">Reports</div>
+      <button class="sb" id="sb5" onclick="openModal('ov-history')"><span class="si">≡</span>Transactions</button>
+      <button class="sb" id="sb6" onclick="cmdAllAccounts()"><span class="si">▤</span>All Accounts</button>
+      <button class="sb" id="sb7" onclick="cmdTotalFunds()"><span class="si">∑</span>Total Funds</button>
+      <button class="sb" id="sb8" onclick="openModal('ov-lowbal')"><span class="si">!</span>Low Balance</button>
+      <div class="sdiv"></div>
+      <button class="sb" style="color:var(--text3)" onclick="cmdExit()"><span class="si" style="opacity:.35">×</span>Exit</button>
+      <div class="sidebar-bottom">
+        <div class="sb-stat"><span class="k">Accounts</span><span class="v" id="sb-count">—</span></div>
+        <div class="sb-stat"><span class="k">Total Funds</span><span class="v" id="sb-funds">—</span></div>
+        <div class="sb-stat"><span class="k">Transactions</span><span class="v" id="sb-txns">—</span></div>
+        <div class="sb-stat"><span class="k">Low (&lt;₹500)</span><span class="v" id="sb-low" style="color:var(--red)">—</span></div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <div class="center">
+      <div class="stat-strip">
+        <div class="sc"><div class="sc-label">Total Accounts</div><div class="sc-val" id="sc-count">0</div><div class="sc-sub"><span class="badge b-green">● Active</span></div></div>
+        <div class="sc"><div class="sc-label">Total Funds</div><div class="sc-val" id="sc-funds" style="font-size:13px">₹0.00</div><div class="sc-sub"><span class="badge b-gold">Persisted</span></div></div>
+        <div class="sc"><div class="sc-label">Transactions</div><div class="sc-val" id="sc-txns">0</div><div class="sc-sub" style="color:var(--text3);font-size:9px">All time</div></div>
+        <div class="sc"><div class="sc-label">Low Balance</div><div class="sc-val" id="sc-low" style="color:var(--red)">0</div><div class="sc-sub"><span class="badge b-red">Below ₹500</span></div></div>
+      </div>
+      <div class="ledger" id="ledger"></div>
+      <div class="bottom-bar">
+        <span class="pm">›</span>
+        <input class="bottom-input" id="cmd-input" placeholder="Type 1–9 or use sidebar / quick commands…" autocomplete="off" spellcheck="false">
+        <span class="hint" id="hint-lbl">1–9 or sidebar</span>
+        <button class="send-btn" onclick="handleCmdInput()">ENTER</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right">
+      <div class="rt">Quick Commands</div>
+      <div class="qgrid">
+        <div class="qc" onclick="openModal('ov-create')"><div class="qn">1</div><div class="ql">New Account</div></div>
+        <div class="qc" onclick="openModal('ov-deposit')"><div class="qn">2</div><div class="ql">Deposit</div></div>
+        <div class="qc" onclick="openModal('ov-withdraw')"><div class="qn">3</div><div class="ql">Withdraw</div></div>
+        <div class="qc" onclick="openModal('ov-balance')"><div class="qn">4</div><div class="ql">Balance</div></div>
+        <div class="qc" onclick="openModal('ov-history')"><div class="qn">5</div><div class="ql">History</div></div>
+        <div class="qc" onclick="cmdAllAccounts()"><div class="qn">6</div><div class="ql">All Accs</div></div>
+        <div class="qc" onclick="cmdTotalFunds()"><div class="qn">7</div><div class="ql">Funds</div></div>
+        <div class="qc" onclick="openModal('ov-lowbal')"><div class="qn">8</div><div class="ql">Low Bal</div></div>
+        <div class="qc qc-edit" onclick="openModal('ov-edit')"><div class="qn">9</div><div class="ql">Edit Acc</div></div>
+        <div class="qc qc-del" onclick="openModal('ov-delete')"><div class="qn" style="font-size:14px;padding-top:2px">DEL</div><div class="ql">Delete Acc</div></div>
+      </div>
+      <div class="rt">Live Accounts</div>
+      <div id="live-list"><div style="font-size:11px;color:var(--text3);text-align:center;padding:12px 0">No accounts yet</div></div>
+      <div class="rt">System Info</div>
+      <div class="icard">
+        <div class="ir"><span class="k">Storage</span><span class="v">localStorage</span></div>
+        <div class="ir"><span class="k">Runtime</span><span class="v">WebAssembly</span></div>
+        <div class="ir"><span class="k">Currency</span><span class="v">INR (Rs.)</span></div>
+        <div class="ir"><span class="k">Overdraft</span><span class="v" style="color:var(--red)">Blocked</span></div>
+        <div class="ir"><span class="k">Duplicates</span><span class="v" style="color:var(--red)">Rejected</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══ BACKGROUND CANVAS ══ */
+(()=>{
+  const cv=document.getElementById('bg'),cx=cv.getContext('2d');
+  let W,H,P=[];
+  function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  addEventListener('resize',rsz);rsz();
+  for(let i=0;i<65;i++)P.push({x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,r:Math.random()*.9+.25,a:Math.random()*.28+.05});
+  function fr(){
+    cx.clearRect(0,0,W,H);
+    for(let p of P){p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(201,168,76,${p.a})`;cx.fill();}
+    for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){
+      const dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){cx.beginPath();cx.moveTo(P[i].x,P[i].y);cx.lineTo(P[j].x,P[j].y);
+        cx.strokeStyle=`rgba(201,168,76,${.045*(1-d/100)})`;cx.lineWidth=.5;cx.stroke();}}
+    requestAnimationFrame(fr);
+  }fr();
+})();
+
+/* ══ DATA LAYER — mirrors C++ OOP classes ══ */
+class Transaction {
+  constructor(id,accNo,type,amount,balanceAfter,dateTime){
+    this.txnId=id;this.accNo=accNo;this.type=type;
+    this.amount=amount;this.balanceAfter=balanceAfter;this.dateTime=dateTime;
+  }
+}
+
+class Account {
+  #accNo;#name;#balance;#mobile;#email;
+  constructor(accNo,name,balance=0,mobile='',email=''){
+    this.#accNo=accNo;this.#name=name;this.#balance=balance;
+    this.#mobile=mobile;this.#email=email;
+  }
+  getAccNo()  {return this.#accNo;}
+  getName()   {return this.#name;}
+  getBalance(){return this.#balance;}
+  getMobile() {return this.#mobile;}
+  getEmail()  {return this.#email;}
+
+  setName(n)  {if(n&&n.trim())this.#name=n.trim();}
+  setMobile(m){this.#mobile=m||'';}
+  setEmail(e) {this.#email=e||'';}
+
+  deposit(amt){if(amt<=0)return false;this.#balance+=amt;return true;}
+  withdraw(amt){if(amt<=0||amt>this.#balance)return false;this.#balance-=amt;return true;}
+
+  toJSON(){return{accNo:this.#accNo,name:this.#name,balance:this.#balance,mobile:this.#mobile,email:this.#email};}
+  static fromJSON(o){return new Account(o.accNo,o.name,o.balance,o.mobile||'',o.email||'');}
+}
+
+class BankSystem {
+  constructor(){this.accounts=[];this.transactions=[];this.txnCounter=1;this._load();}
+
+  _save(){
+    try{
+      localStorage.setItem('ib_accounts',JSON.stringify(this.accounts.map(a=>a.toJSON())));
+      localStorage.setItem('ib_txns',JSON.stringify({txns:this.transactions,ctr:this.txnCounter}));
+    }catch(e){}
+  }
+  _load(){
+    try{
+      const a=localStorage.getItem('ib_accounts');
+      if(a)this.accounts=JSON.parse(a).map(Account.fromJSON);
+      const t=localStorage.getItem('ib_txns');
+      if(t){const d=JSON.parse(t);this.transactions=d.txns;this.txnCounter=d.ctr||1;}
+    }catch(e){}
+  }
+  _find(accNo){return this.accounts.find(a=>a.getAccNo()===accNo)||null;}
+  _now(){
+    const d=new Date();
+    return d.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+
+           d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});
+  }
+  _ref(id){return'TXN'+String(id).padStart(4,'0');}
+
+  createAccount(accNo,name,openBal,mobile,email){
+    accNo=parseInt(accNo);openBal=parseFloat(openBal)||0;
+    if(!accNo||accNo<=0)       return{ok:false,msg:'Invalid account number.'};
+    if(this._find(accNo))      return{ok:false,msg:`Account #${accNo} already exists.`};
+    if(!name||!name.trim())    return{ok:false,msg:'Name cannot be empty.'};
+    if(openBal<0)              return{ok:false,msg:'Opening balance cannot be negative.'};
+    const acc=new Account(accNo,name.trim(),openBal,mobile||'',email||'');
+    this.accounts.push(acc);
+    if(openBal>0)this.transactions.push(new Transaction(this.txnCounter++,accNo,'DEPOSIT',openBal,openBal,this._now()));
+    this._save();
+    return{ok:true,accNo,name:name.trim(),openBal,mobile:mobile||'',email:email||''};
+  }
+
+  editAccount(accNo,name,mobile,email){
+    accNo=parseInt(accNo);
+    const acc=this._find(accNo);
+    if(!acc)return{ok:false,msg:`Account #${accNo} not found.`};
+    if(!name||!name.trim())return{ok:false,msg:'Name cannot be empty.'};
+    const old={name:acc.getName(),mobile:acc.getMobile(),email:acc.getEmail()};
+    acc.setName(name);acc.setMobile(mobile);acc.setEmail(email);
+    this._save();
+    return{ok:true,accNo,name:acc.getName(),mobile:acc.getMobile(),email:acc.getEmail(),old};
+  }
+
+  deleteAccount(accNo){
+    accNo=parseInt(accNo);
+    const idx=this.accounts.findIndex(a=>a.getAccNo()===accNo);
+    if(idx===-1)return{ok:false,msg:`Account #${accNo} not found.`};
+    const acc=this.accounts[idx];
+    const name=acc.getName(),bal=acc.getBalance();
+    this.accounts.splice(idx,1);
+    const txnCount=this.transactions.filter(t=>t.accNo===accNo).length;
+    this.transactions=this.transactions.filter(t=>t.accNo!==accNo);
+    this._save();
+    return{ok:true,accNo,name,bal,txnCount};
+  }
+
+  deposit(accNo,amount){
+    accNo=parseInt(accNo);amount=parseFloat(amount);
+    const acc=this._find(accNo);
+    if(!acc)return{ok:false,msg:`Account #${accNo} not found.`};
+    if(!acc.deposit(amount))return{ok:false,msg:'Invalid amount (must be > 0).'};
+    const t=new Transaction(this.txnCounter++,accNo,'DEPOSIT',amount,acc.getBalance(),this._now());
+    this.transactions.push(t);this._save();
+    return{ok:true,accNo,name:acc.getName(),amount,balance:acc.getBalance(),ref:this._ref(t.txnId)};
+  }
+
+  withdraw(accNo,amount){
+    accNo=parseInt(accNo);amount=parseFloat(amount);
+    const acc=this._find(accNo);
+    if(!acc)return{ok:false,msg:`Account #${accNo} not found.`};
+    if(!acc.withdraw(amount))return{ok:false,msg:`Insufficient funds. Balance: ${fmt(acc.getBalance())}`};
+    const t=new Transaction(this.txnCounter++,accNo,'WITHDRAW',amount,acc.getBalance(),this._now());
+    this.transactions.push(t);this._save();
+    return{ok:true,accNo,name:acc.getName(),amount,balance:acc.getBalance(),ref:this._ref(t.txnId)};
+  }
+
+  balanceEnquiry(accNo){
+    accNo=parseInt(accNo);
+    const acc=this._find(accNo);
+    if(!acc)return{ok:false,msg:`Account #${accNo} not found.`};
+    return{ok:true,accNo,name:acc.getName(),balance:acc.getBalance(),mobile:acc.getMobile(),email:acc.getEmail()};
+  }
+
+  transactionHistory(accNo,n){
+    accNo=parseInt(accNo);n=parseInt(n)||5;
+    const acc=this._find(accNo);
+    if(!acc)return{ok:false,msg:`Account #${accNo} not found.`};
+    const txns=this.transactions.filter(t=>t.accNo===accNo).slice(-n).reverse();
+    return{ok:true,accNo,name:acc.getName(),balance:acc.getBalance(),txns};
+  }
+
+  allAccounts(){return this.accounts.map(a=>({accNo:a.getAccNo(),name:a.getName(),balance:a.getBalance(),mobile:a.getMobile(),email:a.getEmail()}));}
+
+  totalFunds(){
+    const total=this.accounts.reduce((s,a)=>s+a.getBalance(),0);
+    return{count:this.accounts.length,total,txnCount:this.transactions.length};
+  }
+
+  lowBalance(threshold){
+    threshold=parseFloat(threshold)||500;
+    const list=this.accounts.filter(a=>a.getBalance()<threshold).map(a=>({accNo:a.getAccNo(),name:a.getName(),balance:a.getBalance()}));
+    return{threshold,list};
+  }
+}
+
+/* ══ APP STATE ══ */
+const bank=new BankSystem();
+const fmt=n=>'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const sep=(ch='-',len=56)=>ch.repeat(len);
+
+/* ══ MODAL HELPERS ══ */
+function openModal(id){
+  document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));
+  const el=document.getElementById(id);if(!el)return;
+  el.classList.add('show');
+  setTimeout(()=>{const inp=el.querySelector('input:not([readonly])');if(inp)inp.focus();},60);
+  const errEl=el.querySelector('.modal-err');if(errEl)errEl.textContent='';
+  const map={'ov-create':'sb1','ov-deposit':'sb2','ov-withdraw':'sb3','ov-balance':'sb4',
+             'ov-history':'sb5','ov-lowbal':'sb8','ov-edit':'sb-edit','ov-delete':'sb-del'};
+  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
+  if(map[id])document.getElementById(map[id])?.classList.add('active');
+}
+function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('show');}
+document.addEventListener('click',e=>{if(e.target.classList.contains('overlay'))closeModal(e.target.id);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.show').forEach(o=>closeModal(o.id));});
+
+/* ══ LEDGER OUTPUT ══ */
+const ledger=document.getElementById('ledger');
+function print(text,cls='c-text'){
+  const s=document.createElement('span');s.className='line '+cls;s.textContent=text+'\n';
+  ledger.appendChild(s);ledger.scrollTop=ledger.scrollHeight;
+}
+function printSep(ch='-'){print(sep(ch,56),'c-sep');}
+function printMenu(){
+  print('');printSep('═');
+  print('  SAVINGS BANK SYSTEM  — Choose an operation','c-gold');
+  printSep('═');
+  print(' 1.  Create New Account','c-prompt');
+  print(' 2.  Deposit','c-prompt');
+  print(' 3.  Withdraw','c-prompt');
+  print(' 4.  Balance Enquiry','c-prompt');
+  print(' 5.  Transaction History','c-prompt');
+  print(' 6.  All Accounts','c-prompt');
+  print(' 7.  Total Funds Report','c-prompt');
+  print(' 8.  Low Balance Report','c-prompt');
+  print(' 9.  Edit Account Details','c-prompt');
+  print(' DEL Delete Account','c-prompt');
+  print(' 0.  Exit','c-prompt');
+  printSep();
+}
+
+/* ══ TOAST ══ */
+function toast(msg,type='info'){
+  const icons={ok:'✓',err:'✕',info:'ℹ',warn:'⚠'};
+  const el=document.createElement('div');
+  el.className=`toast t${type}`;
+  el.innerHTML=`<span class="toast-ic">${icons[type]||'•'}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.style.cssText+='opacity:0;transform:translateX(14px);transition:all .22s';setTimeout(()=>el.remove(),230);},2800);
+}
+
+/* ══ STATS ══ */
+function updateStats(){
+  const tf=bank.totalFunds(),low=bank.lowBalance(500).list.length;
+  document.getElementById('sc-count').textContent=tf.count;
+  document.getElementById('sc-funds').textContent=fmt(tf.total);
+  document.getElementById('sc-txns').textContent=tf.txnCount;
+  document.getElementById('sc-low').textContent=low;
+  document.getElementById('sb-count').textContent=tf.count||'—';
+  document.getElementById('sb-funds').textContent=tf.count?fmt(tf.total):'—';
+  document.getElementById('sb-txns').textContent=tf.txnCount||'0';
+  document.getElementById('sb-low').textContent=low||'0';
+  const ll=document.getElementById('live-list');
+  if(!tf.count){ll.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:12px 0">No accounts yet</div>';return;}
+  ll.innerHTML=bank.accounts.map(a=>`
+    <div class="la">
+      <div style="flex:1;min-width:0" onclick="quickBal(${a.getAccNo()})">
+        <div class="la-no">#${a.getAccNo()}</div>
+        <div class="la-nm">${a.getName()}</div>
+        <div class="la-actions">
+          <button class="la-btn la-btn-e" onclick="event.stopPropagation();quickEdit(${a.getAccNo()})">edit</button>
+          <button class="la-btn la-btn-d" onclick="event.stopPropagation();quickDelete(${a.getAccNo()})">del</button>
+        </div>
+      </div>
+      <div class="la-bal ${a.getBalance()<500?'low':'ok'}" onclick="quickBal(${a.getAccNo()})">${fmt(a.getBalance())}</div>
+    </div>`).join('');
+}
+
+/* ══ OPERATIONS ══ */
+function clearFields(...ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';})}
+
+function doCreateAccount(){
+  const accNo=document.getElementById('f-accno').value;
+  const name =document.getElementById('f-name').value;
+  const bal  =document.getElementById('f-bal').value||'0';
+  const mobile=document.getElementById('f-mobile').value.trim();
+  const email =document.getElementById('f-email').value.trim();
+  const errEl=document.getElementById('err-create');
+  const r=bank.createAccount(accNo,name,bal,mobile,email);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-create');
+  clearFields('f-accno','f-name','f-bal','f-mobile','f-email');
+  print('');print(`  › Create Account  [1]`,'c-in');
+  print(`  Account #${r.accNo} — "${r.name}" opened successfully.`,'c-green');
+  print(`  Opening balance : ${fmt(r.openBal)}`,'c-text');
+  if(r.mobile) print(`  Mobile          : ${r.mobile}`,'c-text');
+  if(r.email)  print(`  Email           : ${r.email}`,'c-text');
+  printSep();
+  toast(`Account #${r.accNo} created!`,'ok');updateStats();printMenu();
+}
+
+function doDeposit(){
+  const accNo=document.getElementById('fd-accno').value;
+  const amt  =document.getElementById('fd-amt').value;
+  const errEl=document.getElementById('err-deposit');
+  const r=bank.deposit(accNo,amt);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-deposit');clearFields('fd-accno','fd-amt');
+  print('');print(`  › Deposit  [2]`,'c-in');
+  print(`  Deposited ${fmt(r.amount)} → #${r.accNo} ${r.name}`,'c-green');
+  print(`  New Balance: ${fmt(r.balance)}   Ref: ${r.ref}`,'c-text');
+  printSep();
+  toast(`Deposited ${fmt(r.amount)}`,'ok');updateStats();printMenu();
+}
+
+function doWithdraw(){
+  const accNo=document.getElementById('fw-accno').value;
+  const amt  =document.getElementById('fw-amt').value;
+  const errEl=document.getElementById('err-withdraw');
+  const r=bank.withdraw(accNo,amt);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-withdraw');clearFields('fw-accno','fw-amt');
+  print('');print(`  › Withdraw  [3]`,'c-in');
+  print(`  Withdrawn ${fmt(r.amount)} ← #${r.accNo} ${r.name}`,'c-amber');
+  print(`  New Balance: ${fmt(r.balance)}   Ref: ${r.ref}`,'c-text');
+  printSep();
+  toast(`Withdrawn ${fmt(r.amount)}`,'ok');updateStats();printMenu();
+}
+
+function doBalance(){
+  const accNo=document.getElementById('fb-accno').value;
+  const errEl=document.getElementById('err-balance');
+  const r=bank.balanceEnquiry(accNo);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-balance');clearFields('fb-accno');
+  print('');print(`  › Balance Enquiry  [4]`,'c-in');printSep();
+  print(`  Account  : #${r.accNo}`,'c-text');
+  print(`  Name     : ${r.name}`,'c-text');
+  print(`  Balance  : ${fmt(r.balance)}`,r.balance<500?'c-red':'c-green');
+  if(r.mobile)print(`  Mobile   : ${r.mobile}`,'c-text');
+  if(r.email) print(`  Email    : ${r.email}`,'c-text');
+  printSep();updateStats();printMenu();
+}
+
+function doHistory(){
+  const accNo=document.getElementById('fh-accno').value;
+  const n    =document.getElementById('fh-n').value||'5';
+  const errEl=document.getElementById('err-history');
+  const r=bank.transactionHistory(accNo,n);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-history');clearFields('fh-accno');
+  print('');print(`  › Transaction History  [5]  — #${r.accNo} ${r.name}`,'c-in');printSep();
+  if(!r.txns.length){print('  No transactions found.','c-dim');}
+  else{
+    print(`  ${'REF'.padEnd(10)}${'DATE / TIME'.padEnd(18)}${'TYPE'.padEnd(10)}${'AMOUNT'.padEnd(13)}BALANCE`,'c-head');
+    printSep();
+    for(const t of r.txns){
+      const ref=('TXN'+String(t.txnId).padStart(4,'0')).padEnd(10);
+      print(`  ${ref}${t.dateTime.padEnd(18)}${t.type.padEnd(10)}${fmt(t.amount).padEnd(13)}${fmt(t.balanceAfter)}`,
+            t.type==='DEPOSIT'?'c-green':'c-amber');
+    }
+  }
+  printSep();updateStats();printMenu();
+}
+
+function doEditAccount(){
+  const accNo =document.getElementById('fe-accno').value;
+  const name  =document.getElementById('fe-name').value;
+  const mobile=document.getElementById('fe-mobile').value.trim();
+  const email =document.getElementById('fe-email').value.trim();
+  const errEl =document.getElementById('err-edit');
+  const r=bank.editAccount(accNo,name,mobile,email);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-edit');
+  print('');print(`  › Edit Account  [9]`,'c-in');printSep();
+  print(`  Account  : #${r.accNo}`,'c-text');
+  print(`  Name     : ${r.old.name} → ${r.name}`,r.old.name!==r.name?'c-amber':'c-text');
+  print(`  Mobile   : ${r.old.mobile||'—'} → ${r.mobile||'—'}`,r.old.mobile!==r.mobile?'c-amber':'c-text');
+  print(`  Email    : ${r.old.email||'—'} → ${r.email||'—'}`,r.old.email!==r.email?'c-amber':'c-text');
+  printSep();
+  toast('Account updated','warn');updateStats();printMenu();
+}
+
+function doDeleteAccount(){
+  const accNo  =document.getElementById('fdel-accno').value;
+  const confirm=document.getElementById('fdel-confirm').value.trim();
+  const errEl  =document.getElementById('err-delete');
+  if(confirm!=='DELETE'){errEl.textContent='Type DELETE (all caps) to confirm.';return;}
+  const r=bank.deleteAccount(accNo);
+  if(!r.ok){errEl.textContent=r.msg;return;}
+  closeModal('ov-delete');
+  clearFields('fdel-accno','fdel-confirm');
+  document.getElementById('del-preview').textContent='';
+  print('');print(`  › Delete Account`,'c-in');printSep();
+  print(`  Account #${r.accNo} — "${r.name}" has been deleted.`,'c-red');
+  print(`  Final balance : ${fmt(r.bal)} (forfeited)`,'c-dim');
+  print(`  Transactions removed: ${r.txnCount}`,'c-dim');
+  printSep();
+  toast(`Account #${r.accNo} deleted`,'err');updateStats();printMenu();
+}
+
+function doLowBalance(){
+  const thresh=document.getElementById('fl-thresh').value||'500';
+  const r=bank.lowBalance(thresh);
+  closeModal('ov-lowbal');
+  print('');print(`  › Low Balance Report  [8]  (threshold: ${fmt(r.threshold)})`,'c-in');printSep();
+  if(!r.list.length){print('  No accounts below threshold.','c-green');}
+  else{
+    print(`  ${'ACC NO'.padEnd(9)}${'NAME'.padEnd(24)}BALANCE`,'c-head');printSep();
+    for(const a of r.list)
+      print(`  ${String(a.accNo).padEnd(9)}${a.name.padEnd(24)}${fmt(a.balance)}`,'c-red');
+    print(`  ${r.list.length} account(s) below threshold`,'c-dim');
+  }
+  printSep();updateStats();printMenu();
+}
+
+function cmdAllAccounts(){
+  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sb6')?.classList.add('active');
+  const list=bank.allAccounts();
+  print('');print(`  › All Accounts  [6]`,'c-in');printSep();
+  if(!list.length){print('  No accounts registered.','c-dim');}
+  else{
+    print(`  ${'#'.padEnd(8)}${'NAME'.padEnd(22)}${'MOBILE'.padEnd(14)}${'BALANCE'}`,'c-head');
+    printSep();
+    for(const a of list)
+      print(`  ${String(a.accNo).padEnd(8)}${a.name.padEnd(22)}${(a.mobile||'—').padEnd(14)}${fmt(a.balance)}`,
+            a.balance<500?'c-red':'c-text');
+    print(`  ${list.length} account(s) total`,'c-dim');
+  }
+  printSep();updateStats();printMenu();
+}
+
+function cmdTotalFunds(){
+  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sb7')?.classList.add('active');
+  const r=bank.totalFunds();
+  print('');print(`  › Total Funds Report  [7]`,'c-in');printSep();
+  print(`  Total accounts    : ${r.count}`,'c-text');
+  print(`  Total funds held  : ${fmt(r.total)}`,'c-green');
+  print(`  Total transactions: ${r.txnCount}`,'c-text');
+  printSep();updateStats();printMenu();
+}
+
+function cmdExit(){print('');print('  Goodbye. Session ended.','c-dim');printSep('═');}
+
+/* ══ QUICK HELPERS for right panel ══ */
+function quickBal(accNo){document.getElementById('fb-accno').value=accNo;openModal('ov-balance');}
+
+function quickEdit(accNo){
+  const r=bank.balanceEnquiry(accNo);if(!r.ok)return;
+  document.getElementById('fe-accno').value=r.accNo;
+  document.getElementById('fe-bal').value=fmt(r.balance);
+  document.getElementById('fe-name').value=r.name;
+  document.getElementById('fe-mobile').value=r.mobile||'';
+  document.getElementById('fe-email').value=r.email||'';
+  document.getElementById('err-edit').textContent='';
+  openModal('ov-edit');
+}
+
+function quickDelete(accNo){
+  document.getElementById('fdel-accno').value=accNo;
+  document.getElementById('fdel-confirm').value='';
+  document.getElementById('err-delete').textContent='';
+  previewDelete();openModal('ov-delete');
+}
+
+function previewDelete(){
+  const accNo=parseInt(document.getElementById('fdel-accno').value);
+  const el=document.getElementById('del-preview');
+  if(!accNo){el.textContent='';return;}
+  const r=bank.balanceEnquiry(accNo);
+  el.textContent=r.ok?`  → ${r.name}  |  Balance: ${fmt(r.balance)}`:'  Account not found.';
+  el.style.color=r.ok?'var(--amber)':'var(--red)';
+}
+
+/* ══ BOTTOM BAR COMMAND INPUT ══ */
+const cmdMap={
+  '1':()=>openModal('ov-create'),'2':()=>openModal('ov-deposit'),
+  '3':()=>openModal('ov-withdraw'),'4':()=>openModal('ov-balance'),
+  '5':()=>openModal('ov-history'),'6':()=>cmdAllAccounts(),
+  '7':()=>cmdTotalFunds(),'8':()=>openModal('ov-lowbal'),
+  '9':()=>openModal('ov-edit'),'del':()=>openModal('ov-delete'),'0':()=>cmdExit(),
+};
+function handleCmdInput(){
+  const inp=document.getElementById('cmd-input');
+  const val=inp.value.trim().toLowerCase();inp.value='';
+  if(cmdMap[val])cmdMap[val]();
+  else if(val)print(`  [!] Unknown command "${val}". Use 0–9 or DEL.`,'c-red');
+  inp.focus();
+}
+document.getElementById('cmd-input').addEventListener('keydown',e=>{if(e.key==='Enter')handleCmdInput();});
+document.addEventListener('keydown',e=>{
+  const active=document.activeElement;
+  const isInput=active.tagName==='INPUT'||active.tagName==='TEXTAREA';
+  if(!isInput&&cmdMap[e.key])cmdMap[e.key]();
+});
+
+/* ══ ENTER submits active modal ══ */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const active=document.activeElement;
+  if(!active||active.tagName!=='INPUT')return;
+  const ov=active.closest('.overlay');if(!ov)return;
+  const fns={'ov-create':doCreateAccount,'ov-deposit':doDeposit,'ov-withdraw':doWithdraw,
+             'ov-balance':doBalance,'ov-history':doHistory,'ov-edit':doEditAccount,
+             'ov-lowbal':doLowBalance};
+  if(fns[ov.id])fns[ov.id]();
+});
+
+/* ══ BOOT ══ */
+(function boot(){
+  printSep('━');
+  print('  IMPERIAL BANK — Cooperative Savings System','c-gold');
+  print('  DA2 · C++ OOP Project · WebAssembly Build','c-dim');
+  printSep('━');
+  updateStats();
+  const tf=bank.totalFunds();
+  if(tf.count>0)print(`  Loaded ${tf.count} account(s) from storage.`,'c-green');
+  printMenu();
+  document.getElementById('cmd-input').focus();
+})();
+</script>
+</body>
+</html>
